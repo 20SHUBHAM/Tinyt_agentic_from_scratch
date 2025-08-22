@@ -4,7 +4,7 @@ modules = ["python-3.10"]
 channel = "stable-22_11"
 
 [deployment]
-run = ["python", "main.py"]
+run = ["python", "main_improved.py"]
 deploymentTarget = "cloudrun"
 
 [[ports]]

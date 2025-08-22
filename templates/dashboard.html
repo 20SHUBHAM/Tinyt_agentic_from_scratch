@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Agentic AI Research Platform{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">AI-Powered Focus Group Research</h1>
+    <p class="page-subtitle">Transform your research with dynamic AI agents that create realistic group discussions from simple descriptions</p>
+</div>
+
+<!-- Progress Steps -->
+<div class="progress-steps">
+    <div class="progress-step">
+        <div class="progress-circle" id="step1-circle">1</div>
+        <div class="progress-label">Create Personas</div>
+    </div>
+    <div class="progress-step">
+        <div class="progress-circle" id="step2-circle">2</div>
+        <div class="progress-label">Design Discussion</div>
+    </div>
+    <div class="progress-step">
+        <div class="progress-circle" id="step3-circle">3</div>
+        <div class="progress-label">Run Simulation</div>
+    </div>
+    <div class="progress-step">
+        <div class="progress-circle" id="step4-circle">4</div>
+        <div class="progress-label">Generate Reports</div>
+    </div>
+    <div class="progress-step">
+        <div class="progress-circle" id="step5-circle">5</div>
+        <div class="progress-label">Analyze Results</div>
+    </div>
+</div>
+
+<!-- Current Session Status -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Current Session</div>
+    </div>
+    <div id="session-status">
+        <div class="loading">
+            <div class="spinner"></div>
+            <span>Loading session status...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Start Options -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-icon">🚀</div>
+        <div class="card-title">Quick Start</div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- Start New Research -->
+        <div style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 0.75rem; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🎭</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Start New Research</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Begin a fresh focus group simulation from scratch</p>
+            <button class="btn btn-primary" onclick="startNewResearch()">Create Personas</button>
+        </div>
+
+        <!-- Continue Existing -->
+        <div style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 0.75rem; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">📋</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Continue Session</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Resume your current research workflow</p>
+            <button class="btn btn-secondary" onclick="continueSession()" id="continue-btn" disabled>Continue</button>
+        </div>
+
+        <!-- View Results -->
+        <div style="padding: 1.5rem; border: 2px solid var(--border-color); border-radius: 0.75rem; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">📊</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">View Results</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Analyze completed research sessions</p>
+            <button class="btn btn-secondary" onclick="viewResults()" id="results-btn" disabled>View Results</button>
+        </div>
+    </div>
+</div>
+
+<!-- Business Use Cases -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-icon">💼</div>
+        <div class="card-title">Business Applications</div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🏦 FinTech Research</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">User experience insights, feature validation, security concerns</p>
+        </div>
+        
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🛒 E-commerce</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Shopping behavior, platform preferences, conversion factors</p>
+        </div>
+        
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">📚 EdTech</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Learning preferences, course validation, engagement drivers</p>
+        </div>
+        
+        <div style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🏥 HealthTech</h4>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">Telemedicine adoption, app usage, privacy concerns</p>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-icon">📈</div>
+        <div class="card-title">Recent Activity</div>
+    </div>
+    <div id="recent-activity">
+        <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No recent activity. Start a new research session to see your workflow history.</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Dashboard-specific functionality
+    async function loadDashboard() {
+        // Load session status
+        const status = await apiCall('/api/session-status');
+        updateSessionStatus(status);
+        updateProgressSteps(status);
+        updateNavigationButtons(status);
+    }
+
+    function updateSessionStatus(status) {
+        const statusElement = document.getElementById('session-status');
+        
+        if (status.session_active) {
+            const currentStage = status.current_stage || 'not_started';
+            const completedStages = status.completed_stages || [];
+            
+            statusElement.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">
+                            Session Active: ${status.session_id}
+                        </div>
+                        <div style="color: var(--text-secondary);">
+                            Current Stage: ${currentStage.replace('_', ' ').toUpperCase()}
+                        </div>
+                        <div style="color: var(--text-secondary);">
+                            Completed: ${completedStages.length}/5 steps
+                        </div>
+                    </div>
+                    <div>
+                        <span class="status-badge status-active">
+                            ⚡ Active
+                        </span>
+                    </div>
+                </div>
+            `;
+        } else {
+            statusElement.innerHTML = `
+                <div style="text-align: center; padding: 1rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        No active session
+                    </div>
+                    <button class="btn btn-primary" onclick="startNewResearch()">
+                        Start New Research
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    function updateProgressSteps(status) {
+        const steps = ['persona_creation', 'schema_creation', 'discussion_execution', 'summary_generation', 'interactive_qa'];
+        const completedStages = status.completed_stages || [];
+        const currentStage = status.current_stage || '';
+
+        steps.forEach((step, index) => {
+            const circle = document.getElementById(`step${index + 1}-circle`);
+            
+            if (completedStages.includes(step)) {
+                circle.className = 'progress-circle completed';
+                circle.innerHTML = '✓';
+            } else if (currentStage === step) {
+                circle.className = 'progress-circle active';
+                circle.innerHTML = index + 1;
+            } else {
+                circle.className = 'progress-circle';
+                circle.innerHTML = index + 1;
+            }
+        });
+    }
+
+    function updateNavigationButtons(status) {
+        const continueBtn = document.getElementById('continue-btn');
+        const resultsBtn = document.getElementById('results-btn');
+        
+        if (status.session_active) {
+            continueBtn.disabled = false;
+            
+            // Enable results button if we have discussion results
+            if (status.completed_stages && status.completed_stages.includes('discussion_execution')) {
+                resultsBtn.disabled = false;
+            }
+        }
+    }
+
+    function startNewResearch() {
+        // Clear any existing session data
+        clearSessionData();
+        window.location.href = '/personas';
+    }
+
+    function continueSession() {
+        const sessionData = getSessionData();
+        if (sessionData.current_stage) {
+            navigateToStep(sessionData.current_stage.replace('_creation', '').replace('_execution', '').replace('_generation', ''));
+        } else {
+            window.location.href = '/personas';
+        }
+    }
+
+    function viewResults() {
+        window.location.href = '/results';
+    }
+
+    // Load dashboard on page load
+    window.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}

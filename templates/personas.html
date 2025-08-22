@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+
+{% block title %}Create Personas - Agentic AI Research Platform{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Create Research Participants</h1>
+    <p class="page-subtitle">Describe your ideal participants and our AI will create diverse, authentic personas for your focus group</p>
+</div>
+
+<!-- Step 1: Persona Generation -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-icon">🎭</div>
+        <div class="card-title">Participant Description</div>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">Describe your ideal research participants:</label>
+        <textarea id="persona-description" class="form-textarea" rows="4" 
+            placeholder="Example: Young professionals in Indian metros (age 22-32) who actively use digital banking and fintech apps. Include both tech-savvy early adopters and more cautious traditional users with different income levels.">Young professionals in Indian metros interested in sustainable lifestyle products</textarea>
+        <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+            💡 Be specific about demographics, psychographics, and context for better results
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+            <label class="form-label">Number of participants:</label>
+            <select id="num-personas" class="form-select">
+                <option value="3">3 participants</option>
+                <option value="4">4 participants</option>
+                <option value="5" selected>5 participants</option>
+                <option value="6">6 participants</option>
+                <option value="7">7 participants</option>
+                <option value="8">8 participants</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Research context:</label>
+            <select id="context" class="form-select">
+                <option value="focus group" selected>Focus Group</option>
+                <option value="user interview">User Interview</option>
+                <option value="market research">Market Research</option>
+                <option value="product feedback">Product Feedback</option>
+                <option value="brand research">Brand Research</option>
+            </select>
+        </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button class="btn btn-primary" onclick="generatePersonas()">
+            🎯 Generate Participants
+        </button>
+        <button class="btn btn-secondary" onclick="loadExamplePersonas()">
+            📝 Load Example
+        </button>
+    </div>
+</div>
+
+<!-- Generated Personas (Editable) -->
+<div id="personas-container" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">👥</div>
+            <div class="card-title">Generated Participants</div>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <p style="color: var(--text-secondary);">Review and edit your participants. Click on any field to modify it.</p>
+        </div>
+        
+        <div id="personas-list"></div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-success" onclick="approvePersonas()" id="approve-btn" disabled>
+                ✅ Approve Participants
+            </button>
+            <button class="btn btn-secondary" onclick="regeneratePersonas()">
+                🔄 Regenerate
+            </button>
+            <button class="btn btn-secondary" onclick="addPersona()">
+                ➕ Add Participant
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Feedback -->
+<div id="ai-feedback" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">AI Analysis</div>
+        </div>
+        <div id="feedback-content"></div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem;">
+    <a href="/" class="btn btn-secondary">← Back to Dashboard</a>
+    <button class="btn btn-primary" onclick="proceedToDiscussion()" id="next-btn" disabled>
+        Next: Design Discussion →
+    </button>
+</div>
+
+<!-- Processing Results -->
+<div id="processing-results"></div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let currentPersonas = [];
+    let editingPersona = null;
+
+    async function generatePersonas() {
+        const description = document.getElementById('persona-description').value;
+        const numPersonas = parseInt(document.getElementById('num-personas').value);
+        const context = document.getElementById('context').value;
+
+        if (!description.trim()) {
+            showError('processing-results', 'Please provide a description of your participants');
+            return;
+        }
+
+        showLoading('processing-results', 'Creating authentic participants...');
+
+        const result = await apiCall('/api/generate-personas', {
+            persona_description: description,
+            num_personas: numPersonas,
+            context: context
+        });
+
+        if (result.success) {
+            currentPersonas = result.personas;
+            saveSessionData({ 
+                personas: currentPersonas,
+                persona_description: description,
+                step_completed: 'personas_generated'
+            });
+            
+            displayPersonas(currentPersonas);
+            showAIFeedback(result.group_dynamics_prediction);
+            document.getElementById('processing-results').innerHTML = '';
+            document.getElementById('approve-btn').disabled = false;
+        } else {
+            showError('processing-results', result.error || 'Failed to generate personas');
+        }
+    }
+
+    function displayPersonas(personas) {
+        const container = document.getElementById('personas-list');
+        const personasContainer = document.getElementById('personas-container');
+        
+        let html = '';
+        
+        personas.forEach((persona, index) => {
+            html += `
+                <div class="persona-card" data-index="${index}">
+                    <div class="persona-header">
+                        <h3 class="persona-name" contenteditable="true" onblur="updatePersona(${index}, 'name', this.textContent)">${persona.name}</h3>
+                        <div class="persona-meta">
+                            <span class="editable-field" contenteditable="true" onblur="updatePersona(${index}, 'age', this.textContent)">${persona.age}</span> years old,
+                            <span class="editable-field" contenteditable="true" onblur="updatePersona(${index}, 'occupation', this.textContent)">${persona.occupation}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="persona-details">
+                        <div class="detail-section">
+                            <label class="detail-label">Background:</label>
+                            <div class="editable-content" contenteditable="true" onblur="updatePersona(${index}, 'background', this.textContent)">${persona.background}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <label class="detail-label">Personality:</label>
+                            <div class="editable-content" contenteditable="true" onblur="updatePersona(${index}, 'personality_traits', this.textContent.split(',').map(s => s.trim()))">${persona.personality_traits ? persona.personality_traits.join(', ') : ''}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <label class="detail-label">Communication Style:</label>
+                            <div class="editable-content" contenteditable="true" onblur="updatePersona(${index}, 'communication_style', this.textContent)">${persona.communication_style || 'Natural and conversational'}</div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <label class="detail-label">Key Motivations:</label>
+                            <div class="editable-content" contenteditable="true" onblur="updatePersona(${index}, 'motivations', this.textContent.split(',').map(s => s.trim()))">${persona.motivations ? persona.motivations.join(', ') : ''}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="persona-actions">
+                        <button class="btn-small btn-secondary" onclick="duplicatePersona(${index})">📋 Duplicate</button>
+                        <button class="btn-small btn-error" onclick="removePersona(${index})">🗑️ Remove</button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        personasContainer.style.display = 'block';
+        
+        // Scroll to personas
+        personasContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updatePersona(index, field, value) {
+        if (currentPersonas[index]) {
+            currentPersonas[index][field] = value;
+            saveSessionData({ personas: currentPersonas });
+            
+            // Visual feedback
+            const card = document.querySelector(`[data-index="${index}"]`);
+            card.style.background = '#f0fdf4';
+            setTimeout(() => {
+                card.style.background = '';
+            }, 1000);
+        }
+    }
+
+    function duplicatePersona(index) {
+        const original = currentPersonas[index];
+        const duplicate = { 
+            ...original, 
+            name: original.name + ' (Copy)',
+            id: Date.now()
+        };
+        
+        currentPersonas.push(duplicate);
+        displayPersonas(currentPersonas);
+        saveSessionData({ personas: currentPersonas });
+    }
+
+    function removePersona(index) {
+        if (currentPersonas.length <= 2) {
+            alert('You need at least 2 participants for a meaningful discussion');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to remove this participant?')) {
+            currentPersonas.splice(index, 1);
+            displayPersonas(currentPersonas);
+            saveSessionData({ personas: currentPersonas });
+        }
+    }
+
+    function addPersona() {
+        const newPersona = {
+            name: 'New Participant',
+            age: 25,
+            occupation: 'Professional',
+            background: 'Add background details here...',
+            personality_traits: ['Add', 'personality', 'traits'],
+            communication_style: 'Natural and conversational',
+            motivations: ['Add', 'key', 'motivations']
+        };
+        
+        currentPersonas.push(newPersona);
+        displayPersonas(currentPersonas);
+        saveSessionData({ personas: currentPersonas });
+    }
+
+    function regeneratePersonas() {
+        if (confirm('This will regenerate all participants. Continue?')) {
+            generatePersonas();
+        }
+    }
+
+    function showAIFeedback(prediction) {
+        const feedbackElement = document.getElementById('ai-feedback');
+        const contentElement = document.getElementById('feedback-content');
+        
+        if (prediction) {
+            contentElement.innerHTML = `
+                <div style="background: #eff6ff; padding: 1rem; border-radius: 0.5rem; border-left: 4px solid var(--primary-color);">
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">🔮 AI Prediction</h4>
+                    <p>${prediction}</p>
+                </div>
+            `;
+            feedbackElement.style.display = 'block';
+        }
+    }
+
+    async function approvePersonas() {
+        if (currentPersonas.length === 0) {
+            showError('processing-results', 'No personas to approve');
+            return;
+        }
+
+        saveSessionData({ 
+            personas_approved: true,
+            step_completed: 'personas_approved'
+        });
+
+        showSuccess('processing-results', `
+            <h4>✅ Participants Approved!</h4>
+            <p>Your ${currentPersonas.length} participants are ready for the discussion. Proceeding to discussion design...</p>
+        `);
+
+        document.getElementById('next-btn').disabled = false;
+        
+        // Auto-navigate after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/discussion';
+        }, 2000);
+    }
+
+    function proceedToDiscussion() {
+        if (!getSessionData().personas_approved) {
+            alert('Please approve your participants first');
+            return;
+        }
+        window.location.href = '/discussion';
+    }
+
+    function loadExamplePersonas() {
+        document.getElementById('persona-description').value = 
+            "Young working professionals in Indian metros (age 22-32) who actively use digital banking, UPI payments, and fintech apps. Include both tech-savvy early adopters and more cautious traditional users with different income levels and banking preferences.";
+        generatePersonas();
+    }
+
+    // Load existing personas if available
+    window.addEventListener('DOMContentLoaded', function() {
+        const sessionData = getSessionData();
+        if (sessionData.personas) {
+            currentPersonas = sessionData.personas;
+            displayPersonas(currentPersonas);
+            document.getElementById('approve-btn').disabled = false;
+            
+            if (sessionData.personas_approved) {
+                document.getElementById('next-btn').disabled = false;
+            }
+        }
+    });
+</script>
+
+<style>
+    .persona-card {
+        background: #fafafa;
+        border: 2px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s;
+    }
+
+    .persona-card:hover {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .persona-header {
+        margin-bottom: 1rem;
+    }
+
+    .persona-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+        border: 2px solid transparent;
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+    }
+
+    .persona-name:focus {
+        border-color: var(--primary-color);
+        background: white;
+        outline: none;
+    }
+
+    .persona-meta {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .editable-field {
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+    }
+
+    .editable-field:hover {
+        background: rgba(37, 99, 235, 0.05);
+        border-color: var(--primary-color);
+    }
+
+    .editable-field:focus {
+        background: white;
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .persona-details {
+        margin-bottom: 1rem;
+    }
+
+    .detail-section {
+        margin-bottom: 1rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        display: block;
+        font-size: 0.875rem;
+    }
+
+    .editable-content {
+        padding: 0.5rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        min-height: 2rem;
+        transition: all 0.2s;
+        line-height: 1.5;
+    }
+
+    .editable-content:hover {
+        background: rgba(37, 99, 235, 0.05);
+        border-color: var(--border-color);
+    }
+
+    .editable-content:focus {
+        background: white;
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+    }
+
+    .persona-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-small {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border: none;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-error {
+        background: var(--error-color);
+        color: white;
+    }
+
+    .btn-error:hover {
+        background: #b91c1c;
+    }
+</style>
+{% endblock %}

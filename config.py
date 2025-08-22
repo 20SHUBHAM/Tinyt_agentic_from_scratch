@@ -20,9 +20,17 @@ class Config:
     MAX_PERSONAS = int(os.getenv('MAX_PERSONAS', 8))
     MAX_DISCUSSION_ROUNDS = int(os.getenv('MAX_DISCUSSION_ROUNDS', 10))
     
+    # Mock Mode for Testing (when API key is dummy)
+    @classmethod
+    def is_mock_mode(cls):
+        return (os.getenv('MOCK_MODE', 'False').lower() == 'true' or 
+                (cls.OPENAI_API_KEY and cls.OPENAI_API_KEY.startswith('sk-debug-key')))
+    
     @classmethod
     def validate(cls):
         """Validate required configuration"""
         if not cls.OPENAI_API_KEY:
             raise ValueError("OPENAI_API_KEY environment variable is required")
+        if cls.is_mock_mode():
+            print("⚠️  Running in MOCK MODE - using simulated responses")
         return True

@@ -1155,7 +1155,7 @@ def index():
 @app.route('/api/start-session', methods=['POST'])
 def start_session():
     """Start new research session"""
-    try {
+    try:
         session_config = request.json or {}
         session_id = orchestrator.start_new_session(session_config)
         return jsonify({
@@ -1170,7 +1170,7 @@ def start_session():
 @app.route('/api/generate-personas', methods=['POST'])
 def generate_personas():
     """Generate personas with natural language output"""
-    try {
+    try:
         data = request.json
         result = orchestrator.step1_generate_personas(
             data.get('persona_description', ''),
@@ -1191,7 +1191,7 @@ def generate_personas():
 @app.route('/api/generate-schema', methods=['POST'])
 def generate_schema():
     """Generate discussion schema with natural language output"""
-    try {
+    try:
         data = request.json
         result = orchestrator.step2_generate_discussion_schema(
             data.get('topic', ''),
@@ -1212,7 +1212,7 @@ def generate_schema():
 @app.route('/api/run-focus-group', methods=['POST'])
 def run_focus_group():
     """Execute focus group simulation"""
-    try {
+    try:
         result = orchestrator.step3_run_focus_group()
         return jsonify(result)
         
@@ -1223,7 +1223,7 @@ def run_focus_group():
 @app.route('/api/generate-summary', methods=['POST'])
 def generate_summary():
     """Generate custom summary"""
-    try {
+    try:
         data = request.json
         result = orchestrator.step4_generate_summary(
             data.get('summary_schema', ''),
@@ -1238,7 +1238,7 @@ def generate_summary():
 @app.route('/api/ask-question', methods=['POST'])
 def ask_question():
     """Interactive Q&A"""
-    try {
+    try:
         data = request.json
         result = orchestrator.step5_ask_question(
             data.get('question', ''),
@@ -1253,7 +1253,7 @@ def ask_question():
 @app.route('/api/suggested-questions', methods=['POST'])
 def suggested_questions():
     """Get AI-suggested questions"""
-    try {
+    try:
         result = orchestrator.get_suggested_questions()
         return jsonify(result)
         
@@ -1264,7 +1264,7 @@ def suggested_questions():
 @app.route('/api/session-status', methods=['POST'])
 def session_status():
     """Get current session status"""
-    try {
+    try:
         result = orchestrator.get_session_status()
         return jsonify(result)
         
@@ -1275,7 +1275,7 @@ def session_status():
 @app.route('/api/export-session', methods=['POST'])
 def export_session():
     """Export session data"""
-    try {
+    try:
         result = orchestrator.export_session_data()
         return jsonify(result)
         
@@ -1286,7 +1286,7 @@ def export_session():
 @app.route('/api/reset-session', methods=['POST'])
 def reset_session():
     """Reset current session"""
-    try {
+    try:
         orchestrator.reset_session()
         return jsonify({"success": True, "message": "Session reset successfully"})
         

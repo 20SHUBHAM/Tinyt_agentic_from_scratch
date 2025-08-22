@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-focus-group-workflow"
+version = "1.0.0"
+description = "Production-ready agentic AI workflow for dynamic group discussion simulation"
+authors = [
+    {name = "Agentic AI Team"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    "tinytroupe>=0.1.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "flask>=2.3.0",
+    "flask-cors>=4.0.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.0.0",
+    "requests>=2.31.0",
+    "jsonschema>=4.0.0",
+    "gunicorn>=21.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/agentic-focus-group-workflow"
+Repository = "https://github.com/yourusername/agentic-focus-group-workflow"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agents*", "*.py"]
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true

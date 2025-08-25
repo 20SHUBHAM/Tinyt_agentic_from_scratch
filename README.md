@@ -1,23 +1,48 @@
-# Agentic Focus Group Simulator (TinyTroupe-inspired)
+# Agentic Focus Group Workflow
 
-Run locally
-- Open `index.html` in a browser, or serve the folder:
-  - Python: `python3 -m http.server 5500` then visit `http://localhost:5500`
-  - Node: `npx serve .` then visit the shown URL
+End-to-end agentic focus group pipeline with LLM-powered agents and Flask API.
 
-Features (Step 1 implemented)
-- Dynamic persona creation from a free-text description
-- Deterministic generation (same input -> same personas)
-- Adjustable participant count (3–12)
-- JSON download of generated personas
+Project Structure
+```text
+agentic-focus-group-workflow/
+├── agents/
+│   ├── __init__.py
+│   ├── base_agent.py
+│   ├── persona_generator.py
+│   ├── context_schema_generator.py
+│   ├── dynamic_focus_group.py
+│   ├── summary_agent.py
+│   └── qa_assistant.py
+├── config.py
+├── workflow_orchestrator.py
+├── web_interface.py
+├── main.py
+├── requirements.txt
+├── .replit
+├── replit.nix
+├── pyproject.toml
+└── README.md
+```
 
-Roadmap
-- Discussion framework generation
-- Focus group simulation (TinyTroupe-style dynamics)
-- Summary generation from custom schema
-- Interactive Q&A over transcript
+Quickstart
+1) Create `.env` with:
+```env
+LLM_API_KEY=your_key
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-4o-mini
+```
+2) Install and run
+```bash
+pip install -r requirements.txt
+python main.py
+```
+3) API endpoints
+- POST `/api/personas` body: `{ "description": str, "count": int }`
+- POST `/api/framework` body: `{ "topic": str, "goals": str, "duration": int, "phases": str, "personas": [] }`
+- POST `/api/simulate` body: `{ "personas": [], "framework": {} }`
+- POST `/api/summary` body: `{ "schema": json_string, "transcript": {} }`
+- POST `/api/qa` body: `{ "question": str, "transcript": {} }`
 
-Replit
-- Create a new Replit (HTML/CSS/JS)
-- Add the three files: `index.html`, `styles.css`, `app.js`
-- Press Run – Replit will host the static site automatically
+Notes
+- Agents use an OpenAI-compatible endpoint; swap base URL/model as needed.
+- For TinyTroupe-style realism, use the simulation agent and your preferred model.

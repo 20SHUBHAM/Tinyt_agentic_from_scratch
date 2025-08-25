@@ -36,7 +36,10 @@ LLM_MODEL=gpt-4o-mini
 pip install -r requirements.txt
 python main.py
 ```
-3) API endpoints
+3) Open the UI
+- Visit `http://localhost:8000/` for the web app. Configure your LLM settings in the UI, then proceed step-by-step.
+
+4) API endpoints
 - POST `/api/personas` body: `{ "description": str, "count": int }`
 - POST `/api/framework` body: `{ "topic": str, "goals": str, "duration": int, "phases": str, "personas": [] }`
 - POST `/api/simulate` body: `{ "personas": [], "framework": {} }`

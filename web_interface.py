@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Dict
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 
 from agents.base_agent import LLMClient
 from agents import (
@@ -41,7 +41,6 @@ class HttpTransport:
 def create_app() -> Flask:
     settings = load_settings()
     llm = LLMClient(settings.api_key, settings.base_url, settings.model, HttpTransport())
-
     orchestrator = WorkflowOrchestrator(
         persona_agent=PersonaGeneratorAgent(llm),
         framework_agent=ContextSchemaGenerator(llm),
@@ -50,7 +49,7 @@ def create_app() -> Flask:
         qa_agent=QAAssistantAgent(llm),
     )
 
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static", static_url_path="/static")
 
     @app.post("/api/personas")
     def personas():
@@ -96,6 +95,10 @@ def create_app() -> Flask:
         return jsonify(result)
 
     @app.get("/")
+    def index() -> Any:
+        return send_from_directory(app.static_folder, "index.html")
+
+    @app.get("/health")
     def health() -> Any:
         return {"status": "ok"}
 

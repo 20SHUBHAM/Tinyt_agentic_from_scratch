@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agentic Focus Group</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Agentic Focus Group Simulator</h1>
+        <p class="subtitle">End-to-end workflow • LLM-powered</p>
+      </header>
+
+      <section class="card settings">
+        <h2>LLM Settings</h2>
+        <div class="grid-3">
+          <div>
+            <label for="apiKey">API Key</label>
+            <input id="apiKey" type="password" placeholder="sk-..." />
+          </div>
+          <div>
+            <label for="baseUrl">Base URL</label>
+            <input id="baseUrl" type="text" placeholder="https://api.openai.com/v1" />
+          </div>
+          <div>
+            <label for="model">Model</label>
+            <input id="model" type="text" placeholder="gpt-4o-mini" value="gpt-4o-mini" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="saveSettings">Save Settings</button>
+          <span id="settingsStatus" class="hint"></span>
+        </div>
+      </section>
+
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-tab="personas" role="tab">1. Personas</button>
+        <button class="tab" data-tab="framework" role="tab">2. Framework</button>
+        <button class="tab" data-tab="simulate" role="tab">3. Simulate</button>
+        <button class="tab" data-tab="summary" role="tab">4. Summary</button>
+        <button class="tab" data-tab="qa" role="tab">5. Q&A</button>
+      </nav>
+
+      <section id="tab-personas" class="panel active" role="tabpanel">
+        <div class="card">
+          <h2>Step 1: Dynamic Persona Creation</h2>
+          <label for="description">Describe your target participants</label>
+          <textarea id="description" placeholder="e.g., College students interested in fitness apps" rows="4"></textarea>
+
+          <label for="count">How many participants? <span id="countValue">5</span></label>
+          <input id="count" type="range" min="3" max="12" step="1" value="5" />
+
+          <div class="actions">
+            <button id="generate">Generate Participants</button>
+            <button id="download" disabled>Download JSON</button>
+            <button id="clear-personas" class="ghost">Clear</button>
+          </div>
+
+          <div id="status"></div>
+          <div id="personas"></div>
+        </div>
+      </section>
+
+      <section id="tab-framework" class="panel" role="tabpanel">
+        <div class="card">
+          <h2>Step 2: Discussion Framework</h2>
+          <div class="grid-2">
+            <div>
+              <label for="topic">Topic</label>
+              <input id="topic" type="text" placeholder="e.g., Adoption of fitness apps" />
+              <label for="goals">Research goals</label>
+              <textarea id="goals" rows="4" placeholder="e.g., Understand motivations, barriers, feature preferences"></textarea>
+            </div>
+            <div>
+              <label for="duration">Total duration (minutes)</label>
+              <input id="duration" type="number" min="10" max="120" value="30" />
+              <label for="phases">Phases (comma separated)</label>
+              <input id="phases" type="text" value="Warm-up, Core Discussion, Wrap-up" />
+            </div>
+          </div>
+          <div class="actions">
+            <button id="generate-framework" disabled>Generate Framework</button>
+            <button id="download-framework" disabled>Download JSON</button>
+          </div>
+          <div id="framework-view"></div>
+        </div>
+      </section>
+
+      <section id="tab-simulate" class="panel" role="tabpanel">
+        <div class="card">
+          <h2>Step 3: Focus Group Simulation</h2>
+          <div class="actions">
+            <button id="run-sim" disabled>Run Simulation</button>
+            <button id="download-transcript" disabled>Download Transcript</button>
+          </div>
+          <div id="sim-status"></div>
+          <div id="transcript"></div>
+        </div>
+      </section>
+
+      <section id="tab-summary" class="panel" role="tabpanel">
+        <div class="card">
+          <h2>Step 4: Custom Summary</h2>
+          <label for="summary-schema">Summary schema (JSON)</label>
+          <textarea id="summary-schema" rows="10" placeholder='{"ExecutiveSummary":"","KeyFindings":[],"Quotes":[]}'></textarea>
+          <div class="actions">
+            <button id="generate-summary" disabled>Generate Summary</button>
+            <button id="download-summary" disabled>Download JSON</button>
+          </div>
+          <pre id="summary-view" class="code"></pre>
+        </div>
+      </section>
+
+      <section id="tab-qa" class="panel" role="tabpanel">
+        <div class="card">
+          <h2>Step 5: Interactive Q&A</h2>
+          <label for="qa-input">Your question</label>
+          <input id="qa-input" type="text" placeholder="e.g., What were the top barriers?" />
+          <div class="actions">
+            <button id="qa-ask" disabled>Ask</button>
+          </div>
+          <div id="qa-answers"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+  </html>
+

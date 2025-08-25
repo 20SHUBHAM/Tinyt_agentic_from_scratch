@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agentic FGD (TinyTroupe-inspired)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Agentic Focus Group Simulator</h1>
+        <p class="subtitle">Step 1 of 5 · Persona generation</p>
+      </header>
+
+      <section class="card">
+        <h2>Step 1: Dynamic Persona Creation</h2>
+        <p>Create authentic, diverse personas from a natural language description.</p>
+        <label for="description">Describe your target participants</label>
+        <textarea id="description" placeholder="e.g., College students interested in fitness apps" rows="4"></textarea>
+
+        <label for="count">How many participants? <span id="countValue">5</span></label>
+        <input id="count" type="range" min="3" max="12" step="1" value="5" />
+
+        <div class="actions">
+          <button id="generate">Generate Participants</button>
+          <button id="download" disabled>Download JSON</button>
+        </div>
+
+        <div id="status"></div>
+
+        <div id="personas"></div>
+      </section>
+
+      <section class="card muted">
+        <p>Next steps (coming soon): Framework generation, Focus group simulation, Summary, and Q&A.</p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+  </html>
+
